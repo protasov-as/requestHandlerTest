@@ -37,6 +37,10 @@ public class TagController {
     }
 
     @ApiOperation(value = "Add a tag to a request", notes = "Adds a tag to a request with the specified id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully retrieved"),
+            @ApiResponse(code = 404, message = "Not found - The folder was not found")
+    })
     @PostMapping("/request2tag")
     public ResponseEntity<?> addTagToRequest(long requestId, long tagId) {
         if(tagMongoRepository.existsById(tagId)
@@ -55,12 +59,20 @@ public class TagController {
     }
 
     @ApiOperation(value = "Add a tag", notes = "Saves a tag with the specified values")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully saved"),
+            @ApiResponse(code = 400, message = "Empty fields found!")
+    })
     @PostMapping("/tags")
-    public void add(Tag tag) {
+    public ResponseEntity<Object> add(Tag tag) {
+        if(tag.getTagName().isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         if(tag.getId()==0) {
             tag.setId(tag.hashCode());
         }
         tagMongoRepository.save(tag);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Get all requests by tag id", notes = "Returns all corresponding requests of a tag with the specified id")

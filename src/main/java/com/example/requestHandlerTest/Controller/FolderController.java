@@ -43,15 +43,27 @@ public class FolderController {
     }
 
     @ApiOperation(value = "Add a folder", notes = "Saves a folder with the specified values")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully saved"),
+            @ApiResponse(code = 400, message = "Empty fields found!")
+    })
     @PostMapping("/folders")
-    public void add(Folder folder) {
+    public ResponseEntity<Object> add(Folder folder) {
+        if(folder.getFolderName().isEmpty()){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         if(folder.getId()==0) {
             folder.setId(folder.hashCode());
         }
         folderMongoRepository.save(folder);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Add a request to a folder", notes = "Saves a request to a folder with the specified id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully retrieved"),
+            @ApiResponse(code = 404, message = "Not found - The folder was not found")
+    })
     @PostMapping("/request2folder")
     public ResponseEntity<?> addRequestToFolder(long requestId, long folderId) {
         if(folderMongoRepository.existsById(folderId)
